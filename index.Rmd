@@ -1,0 +1,88 @@
+---
+title: "Seafood Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(lubridate)
+library(vroom)
+library(tidyverse)
+library(shiny)
+library(DT)
+```
+
+```{r loading data, include=FALSE}
+
+df_Seafood <- vroom("TradeData_HMRC_Preliminary-Cleaned.csv")
+```
+
+```{r Data processing, include=FALSE}
+##### Turning Character columns in Factors. But first selecting all columns of class = Character
+# https://stackoverflow.com/questions/33180058/coerce-multiple-columns-to-factors-at-once
+df_Seafood[map_lgl(df_Seafood, is.character)] <- lapply(df_Seafood[map_lgl(df_Seafood, is.character)], factor)
+
+#### turning Year in to date.year
+## Issue here. We only have years, and that is not a valid date format for plotting. But, since the values are annual sum. But, for plotting it looks better using the 1st of Jan. If we would use e.g. the 31.12.2019, it would look like the data is for 2020 :( 
+
+df_Seafood$Year <-dmy(as.character(paste("01-01",df_Seafood$Year)))
+```
+
+
+Row
+-----------------------------------------------------------------------
+
+
+### Select input
+
+
+```{r}
+
+# https://stackoverflow.com/questions/45887038/plot-simple-chart-on-the-basis-of-data-subset-in-flexdashboard
+selectInput("selectInput1", "Select Species Type:", 
+            choices = unique(df_Seafood$SpeciesType))
+
+selectInput("selectInput2", "Select Commodity:", 
+            choices = unique(df_Seafood$Commodity))
+
+#input
+
+```
+
+
+
+```{r}
+# Create a subset data frame 
+selectedData = reactive({df_Seafood %>% filter(SpeciesType == as.character(input$selectInput1), Commodity == as.character(input$selectInput2)) 
+  
+   })
+```
+
+
+### Chart 1 Annual Plot
+
+```{r}
+renderPlot({
+  ggplot(selectedData(), aes(Year,Value))+
+      geom_line(aes(colour = Species))
+    
+})
+```
+
+
+Row 
+-----------------------------------------------------------------------
+
+### Data Table
+
+```{r}
+
+DT::renderDataTable({
+  data <-selectedData()
+  DT::datatable(data)
+  })
+
+```
