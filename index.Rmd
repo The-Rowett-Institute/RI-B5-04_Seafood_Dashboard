@@ -32,7 +32,10 @@ df_Seafood[map_lgl(df_Seafood, is.character)] <- lapply(df_Seafood[map_lgl(df_Se
 df_Seafood$Year <-dmy(as.character(paste("01-01",df_Seafood$Year)))
 ```
 
-## Row
+Dashboard
+=======================================================================
+
+## Row {.sidebar}
 
 ### Select input
 
@@ -56,6 +59,9 @@ selectedData = reactive({df_Seafood %>% filter(SpeciesType == as.character(input
    })
 ```
 
+
+## Row
+
 ### Chart 1 Annual Plot
 
 ```{r}
@@ -65,8 +71,6 @@ renderPlot({
     
 })
 ```
-
-## Row
 
 ### Data Table
 
@@ -78,3 +82,13 @@ DT::renderDataTable({
   })
 
 ```
+
+
+About
+=======================================================================
+
+Source
+=======================================================================
+
+Related Publication
+=======================================================================
