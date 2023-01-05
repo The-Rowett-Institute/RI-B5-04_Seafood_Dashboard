@@ -60,7 +60,7 @@ selectedData = reactive({df_Seafood %>% filter(SpeciesType == as.character(input
 ```
 
 
-## Row
+## Row {.tabset .tabset-fade}
 
 ### Chart 1 Annual Plot
 
@@ -71,6 +71,7 @@ renderPlot({
     
 })
 ```
+
 
 ### Data Table
 
