@@ -4,6 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: fill
+    runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -31,13 +32,9 @@ df_Seafood[map_lgl(df_Seafood, is.character)] <- lapply(df_Seafood[map_lgl(df_Se
 df_Seafood$Year <-dmy(as.character(paste("01-01",df_Seafood$Year)))
 ```
 
-
-Row
------------------------------------------------------------------------
-
+## Row
 
 ### Select input
-
 
 ```{r}
 
@@ -52,15 +49,12 @@ selectInput("selectInput2", "Select Commodity:",
 
 ```
 
-
-
 ```{r}
 # Create a subset data frame 
 selectedData = reactive({df_Seafood %>% filter(SpeciesType == as.character(input$selectInput1), Commodity == as.character(input$selectInput2)) 
   
    })
 ```
-
 
 ### Chart 1 Annual Plot
 
@@ -72,9 +66,7 @@ renderPlot({
 })
 ```
 
-
-Row 
------------------------------------------------------------------------
+## Row
 
 ### Data Table
 
