@@ -4,25 +4,27 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: fill
+    source_code: embed
     #runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
+library(plotly)
 library(lubridate)
 library(vroom)
 library(tidyverse)
 library(shiny)
 library(DT)
+library(crosstalk)
 ```
 
-```{r loading data, include=FALSE}
-
+```{r global, include=FALSE}
+## Loading data
 df_Seafood <- vroom("TradeData_HMRC_Preliminary-Cleaned.csv")
-```
 
-```{r Data processing, include=FALSE}
-##### Turning Character columns in Factors. But first selecting all columns of class = Character
+## processing data
+# Turning Character columns in Factors. But first selecting all columns of class = Character
 # https://stackoverflow.com/questions/33180058/coerce-multiple-columns-to-factors-at-once
 df_Seafood[map_lgl(df_Seafood, is.character)] <- lapply(df_Seafood[map_lgl(df_Seafood, is.character)], factor)
 
@@ -30,6 +32,9 @@ df_Seafood[map_lgl(df_Seafood, is.character)] <- lapply(df_Seafood[map_lgl(df_Se
 ## Issue here. We only have years, and that is not a valid date format for plotting. But, since the values are annual sum. But, for plotting it looks better using the 1st of Jan. If we would use e.g. the 31.12.2019, it would look like the data is for 2020 :( 
 
 df_Seafood$Year <-dmy(as.character(paste("01-01",df_Seafood$Year)))
+
+df_Seafood_shared <- SharedData$new(df_Seafood)
+
 ```
 
 Dashboard
@@ -39,24 +44,27 @@ Dashboard
 
 ### Select input
 
-```{r}
+```{r filter}
 
 # https://stackoverflow.com/questions/45887038/plot-simple-chart-on-the-basis-of-data-subset-in-flexdashboard
-selectInput("selectInput1", "Select Species Type:", 
-            choices = unique(df_Seafood$SpeciesType))
+#selectInput("selectInput1", "Select Species Type:", 
+          #  choices = unique(df_Seafood$SpeciesType))
 
-selectInput("selectInput2", "Select Commodity:", 
-            choices = unique(df_Seafood$Commodity))
+#electInput("selectInput2", "Select Commodity:", 
+           # choices = unique(df_Seafood$Commodity))
 
 #input
 
+
+filter_checkbox("Commodity", "Choose Import or Export", df_Seafood_shared, ~Commodity)
+filter_select("SpeciesType", "Choose Species Type", df_Seafood_shared, ~SpeciesType)
 ```
 
 ```{r}
 # Create a subset data frame 
-selectedData = reactive({df_Seafood %>% filter(SpeciesType == as.character(input$selectInput1), Commodity == as.character(input$selectInput2)) 
+#selectedData = reactive({df_Seafood %>% filter(SpeciesType == as.character(input$selectInput1), Commodity == as.character(input$selectInput2)) 
   
-   })
+ #  })
 ```
 
 
@@ -70,6 +78,18 @@ renderPlot({
       geom_line(aes(colour = Species))
     
 })
+```
+
+### Chart 2 Annual Plotly
+
+```{r plotly}
+df_Seafood_shared %>%
+  #mutate(text_label = str_c("Weight: ", Value, " [",Units,"]", "\nSpecies: ", Species, ", ", SpeciesType)) %>% 
+plot_ly(
+    x = ~Year, y = ~Value, type = "scatter", mode = "markers",
+    #color = ~Species, 
+    #text = ~text_label,
+    alpha = 0.5)
 ```
 
 
