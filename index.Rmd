@@ -150,6 +150,18 @@ plot_ly(
     alpha = 0.5)
 ```
 
+### Chart 2 Annual Plotly
+
+```{r plotly}
+df_Seafood_shared %>%
+  #mutate(text_label = str_c("Weight: ", Value, " [",Units,"]", "\nSpecies: ", Species, ", ", SpeciesType)) %>% 
+plot_ly(
+    x = ~Year, y = ~Value, type = "scatter", mode = "markers",
+    #color = ~Species, 
+    #text = ~text_label,
+    alpha = 0.5)
+```
+
 
 ### Data Table
 
