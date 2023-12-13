@@ -6,6 +6,7 @@ output:
     vertical_layout: fill
     source_code: embed
     #runtime: shiny
+    output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -14,14 +15,16 @@ library(plotly)
 library(lubridate)
 library(vroom)
 library(tidyverse)
-library(shiny)
+#library(shiny)
 library(DT)
 library(crosstalk)
+library(kableExtra)
+library(lubridate)
 ```
 
 ```{r global, include=FALSE}
 ## Loading data
-df_Seafood <- vroom("TradeData_HMRC_Preliminary-Cleaned.csv")
+df_Seafood <- vroom("Seafood-database_preliminary.csv")
 
 ## processing data
 # Turning Character columns in Factors. But first selecting all columns of class = Character
@@ -33,7 +36,12 @@ df_Seafood[map_lgl(df_Seafood, is.character)] <- lapply(df_Seafood[map_lgl(df_Se
 
 df_Seafood$Year <-dmy(as.character(paste("01-01",df_Seafood$Year)))
 
-df_Seafood_shared <- SharedData$new(df_Seafood)
+#df_Seafood_shared <- SharedData$new(df_Seafood)
+
+df_UKPOP <- vroom("ONS_UK_population-19712020.csv")
+df_UKPOP$Year <-dmy(as.character(paste("01-01",df_UKPOP$CDID)))
+
+
 
 ```
 
@@ -44,21 +52,22 @@ df_Seafood_shared <- SharedData$new(df_Seafood)
 
 ## Start with import and exports
 
-df_Seafood %>% group_by(ids = Commodity) %>% summarise(values = sum(Value))
-df_Seafood %>% group_by(parents = Commodity, ids = SpeciesType) %>% summarise(values = sum(Value))
-df_Seafood %>% group_by(Commodity, parents = SpeciesType, ids = Species) %>% summarise(values = sum(Value))
+df_Seafood %>% group_by(ids = Commodity) %>%  summarise(values = sum(na.omit(Volume)))
+df_Seafood %>% group_by(parents = Commodity, ids = SpeciesType) %>%  summarise(values = sum(na.omit(Volume)))
+df_Seafood %>% group_by(Commodity, parents = SpeciesType, ids = Species) %>%  summarise(values = sum(na.omit(Volume)))
+
 
 ## Import & Export sums
 df_sunburst <- df_Seafood %>% 
   group_by(ids = as.character(Commodity)) %>% 
-  summarise(values = sum(Value)) %>% 
+  summarise(values = sum(na.omit(Volume))) %>% 
   mutate(labels = ids, parents ="")
 
 
 ## Species Type sums
 df_sunburst.temp <-df_Seafood %>% 
   group_by(parents = as.character(Commodity), labels = as.character(SpeciesType)) %>% 
-  summarise(values = sum(Value)) %>% 
+  summarise(values = sum(na.omit(Volume))) %>% 
   mutate(ids = paste(parents," - ", labels)) # to create unique ids
 
 
@@ -67,7 +76,7 @@ df_sunburst <- rbind(df_sunburst,df_sunburst.temp)
 ## Species sums
 df_sunburst.temp <- df_Seafood %>% 
   group_by(Commodity, SpeciesType, labels = as.character(Species)) %>% 
-  summarise(values = sum(Value)) %>% 
+  summarise(values = sum(na.omit(Volume))) %>% 
   ungroup() %>% 
   mutate(parents = paste(Commodity," - ", SpeciesType),
          ids = paste(Commodity," - ", SpeciesType, " - ", labels)) %>% 
@@ -77,16 +86,128 @@ df_sunburst <- rbind(df_sunburst,df_sunburst.temp)
 
 ### last one years (no calucation)
 df_sunburst.temp <- df_Seafood %>% 
-  select(Commodity, SpeciesType, Species, Year, Value) %>% 
+  select(Commodity, SpeciesType, Species, Year, Volume) %>% 
   mutate(parents = paste(Commodity," - ", SpeciesType, " - ", Species),
          ids = paste(Commodity," - ", SpeciesType, " - ", Species, " - ", Year),
          labels = lubridate::year(Year),
-         values = Value) %>% 
+         values = Volume) %>% 
   select(ids, labels, parents, values)
 
 df_sunburst <- rbind(df_sunburst,df_sunburst.temp)
 
+df_Seafood.cp <- df_Seafood %>% filter(Commodity %in% c("Consumption", "Purchases"))
 
+## "Consumption" & "Purchases sums
+df_sunburst.cp <- df_Seafood.cp %>% 
+  group_by(ids = as.character(Commodity)) %>% 
+   summarise(values = sum(na.omit(Volume))) %>% 
+  mutate(labels = ids, parents ="")
+
+
+## Species Type sums
+df_sunburst.temp <-df_Seafood.cp %>% 
+  group_by(parents = as.character(Commodity), labels = as.character(SpeciesType)) %>% 
+   summarise(values = sum(na.omit(Volume))) %>% 
+  mutate(ids = paste(parents," - ", labels)) # to create unique ids
+
+
+df_sunburst.cp <- rbind(df_sunburst.cp,df_sunburst.temp)
+
+## Species sums
+df_sunburst.temp <- df_Seafood.cp %>% 
+  group_by(Commodity, SpeciesType, labels = as.character(Species)) %>% 
+   summarise(values = sum(na.omit(Volume))) %>% 
+  ungroup() %>% 
+  mutate(parents = paste(Commodity," - ", SpeciesType),
+         ids = paste(Commodity," - ", SpeciesType, " - ", labels)) %>% 
+  select(ids, labels, parents, values)
+
+df_sunburst.cp <- rbind(df_sunburst.cp,df_sunburst.temp)
+
+### last one years (no calucation)
+df_sunburst.temp <- df_Seafood.cp %>% 
+  select(Commodity, SpeciesType, Species, Year, Volume) %>% 
+  mutate(parents = paste(Commodity," - ", SpeciesType, " - ", Species),
+         ids = paste(Commodity," - ", SpeciesType, " - ", Species, " - ", Year),
+         labels = lubridate::year(Year),
+         values = Volume) %>% 
+  select(ids, labels, parents, values)
+
+df_sunburst.cp <- rbind(df_sunburst.cp,df_sunburst.temp)
+
+
+```
+
+```{r table Data availablity}
+
+df_SF_availablity <- df_Seafood %>% select(Species, Commodity) %>%
+  unique() %>% 
+  mutate(Available = "Yes") %>% 
+  pivot_wider(names_from = Commodity, 
+              values_from = Available,
+              values_fill = "No") %>% 
+  mutate(Exports = as.factor(Exports),
+         Imports = as.factor(Imports),
+         Production = as.factor(Production),
+         Consumption = as.factor(Consumption),
+         Purchases = as.factor(Purchases))
+
+
+
+```
+
+```{r all species through year}
+
+df_figure <- df_Seafood %>% select(DataSupplier, DataSet, Commodity, Species, SACN, Year, Volume, Units) %>% 
+  filter(Commodity %in% c("Exports","Imports", "Consumption", "Purchases")) %>% 
+  pivot_wider(names_from = Commodity, values_from = Volume)%>% 
+  mutate(Year_notDate = as.numeric(year(Year)))
+
+#Subplots for chart 3
+fig1 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Exports, color = ~Species, legendgroup =~Species) %>% 
+  layout(yaxis = list(title = "Volume [g]"))
+fig2 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Imports, color = ~Species, legendgroup =~Species, showlegend= FALSE)%>% 
+  layout(yaxis = list(title = "Volume [g]"))
+fig3 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Consumption, color = ~Species, legendgroup =~Species, showlegend= FALSE) %>% 
+  layout(yaxis = list(title = "Volume [g]"))
+fig4 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Purchases, color = ~Species, legendgroup =~Species, showlegend= FALSE) %>% 
+  layout(yaxis = list(title = "Volume [g]"), xaxis = list(title = "Years"))
+
+
+#Subplots for chart 4
+df_SF_UKPOP <- df_UKPOP %>% filter(CDID %in% c("2009","2010","2011","2012","2013","2014","2015","2016","2017","2018", "2019"))
+
+fig1b <-plot_ly() %>%  
+  add_trace(data = df_SF_UKPOP, x = ~CDID, y = ~UKPOP, name = "UK Population", type = 'scatter', mode = 'lines+markers', yaxis="y2") %>% 
+  add_trace(data = df_figure, type = 'bar', x=~Year_notDate, y=~Exports, color = ~Species, legendgroup =~Species, yaxis="y") %>% 
+  layout(yaxis = list(title = "Volume [g]")) %>% 
+  layout(yaxis=list(side="left"),
+         yaxis2=list(side="right",overlaying="y"),
+         showlegend=TRUE)
+
+fig2b <-plot_ly() %>%  
+  #add_trace(data = df_SF_UKPOP, x = ~CDID, y = ~UKPOP, name = "UK Population", type = 'scatter', mode = 'lines+markers', yaxis="y2") %>%
+  add_trace(data = df_figure, type = 'bar', x=~Year_notDate, y=~Imports, color = ~Species, legendgroup =~Species, showlegend= FALSE, yaxis="y")%>% 
+  layout(yaxis = list(title = "Volume [g]"))#%>% 
+  #layout(yaxis=list(side="left"),
+        # yaxis2=list(side="right",overlaying="y"),
+        # showlegend=TRUE)
+
+fig3b <-plot_ly() %>%  
+  #add_trace(data = df_SF_UKPOP, x = ~CDID, y = ~UKPOP, name = "UK Population", type = 'scatter', mode = 'lines+markers', yaxis="y2") %>%
+  add_trace(data = df_figure, type = 'bar', x=~Year_notDate, y=~Consumption, color = ~Species, legendgroup =~Species, showlegend= FALSE, yaxis="y") %>% 
+  layout(yaxis = list(title = "Volume [g]")) #%>% 
+  #layout(yaxis=list(side="left"),
+     #    yaxis2=list(side="right",overlaying="y"),
+     #    showlegend=TRUE)
+
+fig4b <-plot_ly() %>%  
+  #add_trace(data = df_SF_UKPOP, x = ~CDID, y = ~UKPOP, name = "UK Population", type = 'scatter', mode = 'lines+markers', yaxis="y2") %>%
+  add_trace(data = df_figure, type = 'bar', x=~Year_notDate, y=~Purchases, color = ~Species, legendgroup =~Species, showlegend= FALSE, yaxis="y") %>% 
+  layout(yaxis = list(title = "Volume [g]"), xaxis = list(title = "Years")) #%>% 
+  #layout(yaxis=list(side="left"),
+   #      yaxis2=list(side="right",overlaying="y"),
+    #     showlegend=TRUE)
 
 ```
 
@@ -98,7 +219,7 @@ Dashboard
 
 ### Select input
 
-```{r filter}
+```{r filter, eval=FALSE, include=FALSE}
 
 # https://stackoverflow.com/questions/45887038/plot-simple-chart-on-the-basis-of-data-subset-in-flexdashboard
 #selectInput("selectInput1", "Select Species Type:", 
@@ -123,44 +244,200 @@ filter_select("SpeciesType", "Choose Species Type", df_Seafood_shared, ~SpeciesT
 
 
 ## Row {.tabset .tabset-fade}
+### Table 1 Data availablitiy
+
+Table 1 shows which commodity data is available for which species in the seafood database.The Seafood data base contains a decade worth (2009 - 2019) of data for 88 marine species.
+
+```{r table 1 kable color }
+df_SF_availablity %>% 
+  kbl() %>% 
+  kable_styling(bootstrap_options = c("striped", "condensed", "responsive")) %>% 
+  column_spec(2, color = "white", background = ifelse(df_SF_availablity$Exports == "Yes",  "green", "red")) %>% 
+  column_spec(3, color = "white", background = ifelse(df_SF_availablity$Imports == "Yes", "green", "red")) %>% 
+  column_spec(4, color = "white", background = ifelse(df_SF_availablity$Production == "Yes", "green", "red")) %>% 
+  column_spec(5, color = "white", background = ifelse(df_SF_availablity$Consumption == "Yes", "green", "red")) %>% 
+  column_spec(6, color = "white", background = ifelse(df_SF_availablity$Purchases == "Yes", "green", "red"))
+
+
+
+```
+
 
 ### Chart 1 Sunburst chart
 
-```{r}
-plot_ly(df_sunburst,
+```{r Chart 1 Sunburst chart}
+layout(plot_ly(df_sunburst,
+               ids = ~ids,
+               labels = ~labels,
+               parents = ~parents,
+               values = ~values,
+               type = 'sunburst',
+               branchvalues = 'total'
+), colorway = c("#009E73", "#56B4E9", "#F0E442" ,"#0072B2", "#E69F00" ))
+
+```
+
+### Chart 2 Sunburst Consumption & Purchase
+
+```{r Chart 2 Sunburst Consumption & Purchase}
+
+layout(plot_ly(df_sunburst.cp,
         ids = ~ids,
   labels = ~labels,
   parents = ~parents,
   values = ~values,
   type = 'sunburst',
   branchvalues = 'total'
+), colorway = c("#0072B2", "#E69F00" ))
+```
+
+### Chart 3 Commodity data
+
+```{r Chart 3 Commodity data}
+#help for check out https://plotly.com/r/subplots/
+
+subplot(fig1, fig2, fig3, fig4, nrows = 4, shareX = TRUE, titleY = TRUE) %>% 
+  layout(yaxis = list(
+    zerolinecolor = '#ffff', 
+           zerolinewidth = 2, 
+           gridcolor = 'ffff'),
+    annotations = list( 
+  list( 
+    x = 0.1,  
+    y = 1.0,  
+    text = "Uk Exports",  
+    xref = "paper",  
+    yref = "paper",  
+    xanchor = "center",  
+    yanchor = "bottom",  
+    showarrow = FALSE 
+  ),  
+  list( 
+    x = 0.1,  
+    y = 0.72,  
+    text = "Uk Imports",  
+    xref = "paper",  
+    yref = "paper",  
+    xanchor = "center",  
+    yanchor = "bottom",  
+    showarrow = FALSE 
+  ),  
+  list( 
+    x = 0.1,  
+    y = 0.48,  
+    text = "UK Consumption",  
+    xref = "paper",  
+    yref = "paper",  
+    xanchor = "center",  
+    yanchor = "bottom",  
+    showarrow = FALSE 
+  ),
+  list( 
+    x = 0.1,  
+    y = 0.22,  
+    text = "UK Purchases",  
+    xref = "paper",  
+    yref = "paper",  
+    xanchor = "center",  
+    yanchor = "bottom",  
+    showarrow = FALSE 
+  ))
+  )
+
+ 
+  
+
+
+```
+### Chart 4 Commodity data + UK population
+
+```{r Chart 4 Commodity data + UK population}
+#help for check out https://plotly.com/r/subplots/
+
+subplot(fig1b, fig2b, fig3b, fig4b, nrows = 4, shareX = TRUE, titleY = TRUE, margin = 0.05) %>% 
+  layout(yaxis = list(
+    zerolinecolor = '#ffff', 
+    zerolinewidth = 2, 
+    gridcolor = 'ffff'),
+    annotations = list( 
+      list( 
+        x = 0.1,  
+        y = 1.0,  
+        text = "Uk Exports",  
+        xref = "paper",  
+        yref = "paper",  
+        xanchor = "center",  
+        yanchor = "bottom",  
+        showarrow = FALSE 
+      ),  
+      list( 
+        x = 0.1,  
+        y = 0.72,  
+        text = "Uk Imports",  
+        xref = "paper",  
+        yref = "paper",  
+        xanchor = "center",  
+        yanchor = "bottom",  
+        showarrow = FALSE 
+      ),  
+      list( 
+        x = 0.1,  
+        y = 0.48,  
+        text = "UK Consumption",  
+        xref = "paper",  
+        yref = "paper",  
+        xanchor = "center",  
+        yanchor = "bottom",  
+        showarrow = FALSE 
+      ),
+      list( 
+        x = 0.1,  
+        y = 0.22,  
+        text = "UK Purchases",  
+        xref = "paper",  
+        yref = "paper",  
+        xanchor = "center",  
+        yanchor = "bottom",  
+        showarrow = FALSE 
+      ))
+  )
+```
+
+
+### Chart 5 Sankey
+
+```{r Chart 5 Sankey}
+
+df_test <- df_Seafood %>% select(Commodity, SACN, Year, Volume) %>% filter(Year == "2018-01-01") %>% 
+  filter(Commodity %in% c("Exports","Imports", "Production", "Purchases")) %>%
+  group_by(SACN, Commodity) %>% summarise(Volume = sum(Volume, na.rm = TRUE))
+
+
+
+plot_ly(
+  type = "sankey",
+  orientation = "h",
+  node = list(
+    label = c("Product"	,"Import",	"Lean",	"Oily",	"Other",	"Shellfish",	"Export",	"Purchase"),
+    color = c("green", "red", "blue", "blue", "blue", "blue","lightblue", "lightgreen"),
+    pad = 15,
+    thickness = 20,
+    line = list(
+      color = "black",
+      width = 0.5
+    )
+  ),
+  
+  link = list(
+    source = c(2,1,0,2,3,1,0,3,4,1,0,4,5,1,0,5),
+    target = c(6,2,2,7,6,3,3,7,6,4,4,7,6,5,5,7),
+    value =  df_test$Volume
+  )
 )
 
-```
-
-### Chart 2 Annual Plotly
-
-```{r plotly, eval=FALSE, include=FALSE}
-df_Seafood_shared %>%
-  #mutate(text_label = str_c("Weight: ", Value, " [",Units,"]", "\nSpecies: ", Species, ", ", SpeciesType)) %>% 
-plot_ly(
-    x = ~Year, y = ~Value, type = "scatter", mode = "lines",
-    #color = ~Species, 
-    #text = ~text_label,
-    alpha = 0.5)
-```
-
-
-### Data Table
-
-```{r}
-
-DT::renderDataTable({
-  data <-selectedData()
-  DT::datatable(data)
-  })
 
 ```
+
 
 
 About
