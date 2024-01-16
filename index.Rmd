@@ -19,8 +19,9 @@ library(tidyverse)
 library(DT)
 library(crosstalk)
 library(kableExtra)
-library(lubridate)
+
 ```
+
 
 ```{r global, include=FALSE}
 ## Loading data
@@ -95,7 +96,7 @@ df_sunburst.temp <- df_Seafood %>%
 
 df_sunburst <- rbind(df_sunburst,df_sunburst.temp)
 
-df_Seafood.cp <- df_Seafood %>% filter(Commodity %in% c("Consumption", "Purchases"))
+df_Seafood.cp <- df_Seafood %>% filter(Species %in% c("Cod", "Haddock", "Prawns", "Tuna", "Salmon", "Mackerel", "Herring"))
 
 ## "Consumption" & "Purchases sums
 df_sunburst.cp <- df_Seafood.cp %>% 
@@ -158,56 +159,24 @@ df_SF_availablity <- df_Seafood %>% select(Species, Commodity) %>%
 
 ```{r all species through year}
 
-df_figure <- df_Seafood %>% select(DataSupplier, DataSet, Commodity, Species, SACN, Year, Volume, Units) %>% 
+df_figure <- df_Seafood %>% select(DataSupplier, DataSet, Commodity, Species, SACN, Year, Volume, Units) %>%
+  mutate(Year_notDate = as.numeric(year(Year))) %>% 
+  left_join(df_UKPOP %>% 
+              select(CDID, UKPOP), by = join_by(Year_notDate == CDID)) %>% 
+
+  mutate( Volume = Volume/UKPOP) %>% 
   filter(Commodity %in% c("Exports","Imports", "Consumption", "Purchases")) %>% 
-  pivot_wider(names_from = Commodity, values_from = Volume)%>% 
-  mutate(Year_notDate = as.numeric(year(Year)))
+  pivot_wider(names_from = Commodity, values_from = Volume) 
 
 #Subplots for chart 3
 fig1 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Exports, color = ~Species, legendgroup =~Species) %>% 
-  layout(yaxis = list(title = "Volume [g]"))
+  layout(yaxis = list(title = "Volume [g/Capita]"))
 fig2 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Imports, color = ~Species, legendgroup =~Species, showlegend= FALSE)%>% 
-  layout(yaxis = list(title = "Volume [g]"))
+  layout(yaxis = list(title = "Volume [g/Capita]"))
 fig3 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Consumption, color = ~Species, legendgroup =~Species, showlegend= FALSE) %>% 
-  layout(yaxis = list(title = "Volume [g]"))
+  layout(yaxis = list(title = "Volume [g/Capita]"))
 fig4 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Purchases, color = ~Species, legendgroup =~Species, showlegend= FALSE) %>% 
-  layout(yaxis = list(title = "Volume [g]"), xaxis = list(title = "Years"))
-
-
-#Subplots for chart 4
-df_SF_UKPOP <- df_UKPOP %>% filter(CDID %in% c("2009","2010","2011","2012","2013","2014","2015","2016","2017","2018", "2019"))
-
-fig1b <-plot_ly() %>%  
-  add_trace(data = df_SF_UKPOP, x = ~CDID, y = ~UKPOP, name = "UK Population", type = 'scatter', mode = 'lines+markers', yaxis="y2") %>% 
-  add_trace(data = df_figure, type = 'bar', x=~Year_notDate, y=~Exports, color = ~Species, legendgroup =~Species, yaxis="y") %>% 
-  layout(yaxis = list(title = "Volume [g]")) %>% 
-  layout(yaxis=list(side="left"),
-         yaxis2=list(side="right",overlaying="y"),
-         showlegend=TRUE)
-
-fig2b <-plot_ly() %>%  
-  #add_trace(data = df_SF_UKPOP, x = ~CDID, y = ~UKPOP, name = "UK Population", type = 'scatter', mode = 'lines+markers', yaxis="y2") %>%
-  add_trace(data = df_figure, type = 'bar', x=~Year_notDate, y=~Imports, color = ~Species, legendgroup =~Species, showlegend= FALSE, yaxis="y")%>% 
-  layout(yaxis = list(title = "Volume [g]"))#%>% 
-  #layout(yaxis=list(side="left"),
-        # yaxis2=list(side="right",overlaying="y"),
-        # showlegend=TRUE)
-
-fig3b <-plot_ly() %>%  
-  #add_trace(data = df_SF_UKPOP, x = ~CDID, y = ~UKPOP, name = "UK Population", type = 'scatter', mode = 'lines+markers', yaxis="y2") %>%
-  add_trace(data = df_figure, type = 'bar', x=~Year_notDate, y=~Consumption, color = ~Species, legendgroup =~Species, showlegend= FALSE, yaxis="y") %>% 
-  layout(yaxis = list(title = "Volume [g]")) #%>% 
-  #layout(yaxis=list(side="left"),
-     #    yaxis2=list(side="right",overlaying="y"),
-     #    showlegend=TRUE)
-
-fig4b <-plot_ly() %>%  
-  #add_trace(data = df_SF_UKPOP, x = ~CDID, y = ~UKPOP, name = "UK Population", type = 'scatter', mode = 'lines+markers', yaxis="y2") %>%
-  add_trace(data = df_figure, type = 'bar', x=~Year_notDate, y=~Purchases, color = ~Species, legendgroup =~Species, showlegend= FALSE, yaxis="y") %>% 
-  layout(yaxis = list(title = "Volume [g]"), xaxis = list(title = "Years")) #%>% 
-  #layout(yaxis=list(side="left"),
-   #      yaxis2=list(side="right",overlaying="y"),
-    #     showlegend=TRUE)
+  layout(yaxis = list(title = "Volume [g/Capita]"), xaxis = list(title = "Years"))
 
 ```
 
@@ -217,7 +186,7 @@ Dashboard
 
 ## Row {.sidebar}
 
-### Select input
+
 
 ```{r filter, eval=FALSE, include=FALSE}
 
@@ -277,7 +246,7 @@ layout(plot_ly(df_sunburst,
 
 ```
 
-### Chart 2 Sunburst Consumption & Purchase
+### Chart 2 Sunburst 5 Species
 
 ```{r Chart 2 Sunburst Consumption & Purchase}
 
@@ -288,7 +257,7 @@ layout(plot_ly(df_sunburst.cp,
   values = ~values,
   type = 'sunburst',
   branchvalues = 'total'
-), colorway = c("#0072B2", "#E69F00" ))
+), colorway = c("#009E73", "#56B4E9", "#F0E442" ,"#0072B2", "#E69F00" ))
 ```
 
 ### Chart 3 Commodity data
@@ -349,64 +318,11 @@ subplot(fig1, fig2, fig3, fig4, nrows = 4, shareX = TRUE, titleY = TRUE) %>%
 
 
 ```
-### Chart 4 Commodity data + UK population
-
-```{r Chart 4 Commodity data + UK population}
-#help for check out https://plotly.com/r/subplots/
-
-subplot(fig1b, fig2b, fig3b, fig4b, nrows = 4, shareX = TRUE, titleY = TRUE, margin = 0.05) %>% 
-  layout(yaxis = list(
-    zerolinecolor = '#ffff', 
-    zerolinewidth = 2, 
-    gridcolor = 'ffff'),
-    annotations = list( 
-      list( 
-        x = 0.1,  
-        y = 1.0,  
-        text = "Uk Exports",  
-        xref = "paper",  
-        yref = "paper",  
-        xanchor = "center",  
-        yanchor = "bottom",  
-        showarrow = FALSE 
-      ),  
-      list( 
-        x = 0.1,  
-        y = 0.72,  
-        text = "Uk Imports",  
-        xref = "paper",  
-        yref = "paper",  
-        xanchor = "center",  
-        yanchor = "bottom",  
-        showarrow = FALSE 
-      ),  
-      list( 
-        x = 0.1,  
-        y = 0.48,  
-        text = "UK Consumption",  
-        xref = "paper",  
-        yref = "paper",  
-        xanchor = "center",  
-        yanchor = "bottom",  
-        showarrow = FALSE 
-      ),
-      list( 
-        x = 0.1,  
-        y = 0.22,  
-        text = "UK Purchases",  
-        xref = "paper",  
-        yref = "paper",  
-        xanchor = "center",  
-        yanchor = "bottom",  
-        showarrow = FALSE 
-      ))
-  )
-```
 
 
-### Chart 5 Sankey
 
-```{r Chart 5 Sankey}
+
+```{r Chart 5 Sankey, eval=FALSE, include=FALSE}
 
 df_test <- df_Seafood %>% select(Commodity, SACN, Year, Volume) %>% filter(Year == "2018-01-01") %>% 
   filter(Commodity %in% c("Exports","Imports", "Production", "Purchases")) %>%
@@ -438,6 +354,8 @@ plot_ly(
 
 ```
 
+Key Messages
+=======================================================================
 
 
 About
