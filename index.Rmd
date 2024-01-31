@@ -159,23 +159,18 @@ df_SF_availablity <- df_Seafood %>% select(Species, Commodity) %>%
 
 ```{r all species through year}
 
-df_figure <- df_Seafood %>% select(DataSupplier, DataSet, Commodity, Species, SACN, Year, Volume, Units) %>%
-  mutate(Year_notDate = as.numeric(year(Year))) %>% 
-  left_join(df_UKPOP %>% 
-              select(CDID, UKPOP), by = join_by(Year_notDate == CDID)) %>% 
-
-  mutate( Volume = Volume/UKPOP) %>% 
-  filter(Commodity %in% c("Exports","Imports", "Consumption", "Purchases")) %>% 
-  pivot_wider(names_from = Commodity, values_from = Volume) 
+df_figure <- df_Seafood %>% select(Commodity, Species, SACN, Year, Volume, Units) %>% group_by(Commodity, Species, SACN, Year) %>% summarise(Volume = sum(Volume)) %>% mutate(Year_notDate = as.numeric(year(Year))) %>% left_join(df_UKPOP %>%  select(CDID, UKPOP), by = join_by(Year_notDate == CDID)) %>% mutate( Volume = Volume/UKPOP) %>% pivot_wider(names_from = Commodity, values_from = Volume)
 
 #Subplots for chart 3
 fig1 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Exports, color = ~Species, legendgroup =~Species) %>% 
   layout(yaxis = list(title = "Volume [g/Capita]"))
 fig2 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Imports, color = ~Species, legendgroup =~Species, showlegend= FALSE)%>% 
   layout(yaxis = list(title = "Volume [g/Capita]"))
-fig3 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Consumption, color = ~Species, legendgroup =~Species, showlegend= FALSE) %>% 
+fig3 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Production, color = ~Species, legendgroup =~Species, showlegend= FALSE)%>% 
   layout(yaxis = list(title = "Volume [g/Capita]"))
-fig4 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Purchases, color = ~Species, legendgroup =~Species, showlegend= FALSE) %>% 
+fig4 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Consumption, color = ~Species, legendgroup =~Species, showlegend= FALSE) %>% 
+  layout(yaxis = list(title = "Volume [g/Capita]"))
+fig5 <-df_figure %>%  plot_ly(type = 'bar', x=~Year, y=~Purchases, color = ~Species, legendgroup =~Species, showlegend= FALSE) %>% 
   layout(yaxis = list(title = "Volume [g/Capita]"), xaxis = list(title = "Years"))
 
 ```
@@ -215,7 +210,7 @@ filter_select("SpeciesType", "Choose Species Type", df_Seafood_shared, ~SpeciesT
 ## Row {.tabset .tabset-fade}
 ### Table 1 Data availablitiy
 
-Table 1 shows which commodity data is available for which species in the seafood database.The Seafood data base contains a decade worth (2009 - 2019) of data for 88 marine species.
+Table 1 shows which commodity data is available for which species in the seafood database.The Seafood data base contains a decade worth (2009 - 2020) of data for 88 marine species.
 
 ```{r table 1 kable color }
 df_SF_availablity %>% 
@@ -265,7 +260,7 @@ layout(plot_ly(df_sunburst.cp,
 ```{r Chart 3 Commodity data}
 #help for check out https://plotly.com/r/subplots/
 
-subplot(fig1, fig2, fig3, fig4, nrows = 4, shareX = TRUE, titleY = TRUE) %>% 
+subplot(fig1, fig2, fig3, fig4, fig5, nrows = 5, shareX = TRUE, titleY = TRUE) %>% 
   layout(yaxis = list(
     zerolinecolor = '#ffff', 
            zerolinewidth = 2, 
@@ -274,7 +269,7 @@ subplot(fig1, fig2, fig3, fig4, nrows = 4, shareX = TRUE, titleY = TRUE) %>%
   list( 
     x = 0.1,  
     y = 1.0,  
-    text = "Uk Exports",  
+    text = "UK Exports",  
     xref = "paper",  
     yref = "paper",  
     xanchor = "center",  
@@ -283,8 +278,8 @@ subplot(fig1, fig2, fig3, fig4, nrows = 4, shareX = TRUE, titleY = TRUE) %>%
   ),  
   list( 
     x = 0.1,  
-    y = 0.72,  
-    text = "Uk Imports",  
+    y = 0.79,  
+    text = "UK Imports",  
     xref = "paper",  
     yref = "paper",  
     xanchor = "center",  
@@ -293,8 +288,8 @@ subplot(fig1, fig2, fig3, fig4, nrows = 4, shareX = TRUE, titleY = TRUE) %>%
   ),  
   list( 
     x = 0.1,  
-    y = 0.48,  
-    text = "UK Consumption",  
+    y = 0.58,  
+    text = "UK Production",  
     xref = "paper",  
     yref = "paper",  
     xanchor = "center",  
@@ -303,14 +298,24 @@ subplot(fig1, fig2, fig3, fig4, nrows = 4, shareX = TRUE, titleY = TRUE) %>%
   ),
   list( 
     x = 0.1,  
-    y = 0.22,  
+    y = 0.39,  
+    text = "UK Consumption",  
+    xref = "paper",  
+    yref = "paper",  
+    xanchor = "center",  
+    yanchor = "bottom",  
+    showarrow = FALSE 
+  ),
+   list( 
+    x = 0.1,  
+    y = 0.19,  
     text = "UK Purchases",  
     xref = "paper",  
     yref = "paper",  
     xanchor = "center",  
     yanchor = "bottom",  
     showarrow = FALSE 
-  ))
+  ) )
   )
 
  
