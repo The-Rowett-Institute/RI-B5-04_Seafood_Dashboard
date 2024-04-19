@@ -237,7 +237,7 @@ layout(plot_ly(df_sunburst,
                values = ~values,
                type = 'sunburst',
                branchvalues = 'total'
-), colorway = c("#009E73", "#56B4E9", "#F0E442" ,"#0072B2", "#E69F00" ))
+), colorway = c("#009E73", "#0072B2", "#56B4E9" ,"#E69F00", "#F0E442" ))
 
 ```
 
@@ -245,14 +245,14 @@ layout(plot_ly(df_sunburst,
 
 ```{r Chart 2 Sunburst Consumption & Purchase}
 
-layout(plot_ly(df_sunburst.cp,
-        ids = ~ids,
-  labels = ~labels,
-  parents = ~parents,
-  values = ~values,
-  type = 'sunburst',
-  branchvalues = 'total'
-), colorway = c("#009E73", "#56B4E9", "#F0E442" ,"#0072B2", "#E69F00" ))
+layout(plot_ly(df_sunburst,
+               ids = ~ids,
+               labels = ~labels,
+               parents = ~parents,
+               values = ~values,
+               type = 'sunburst',
+               branchvalues = 'total'
+), colorway = c("#009E73", "#0072B2", "#56B4E9" ,"#E69F00", "#F0E442" ))
 ```
 
 ### Chart 3 Commodity data
