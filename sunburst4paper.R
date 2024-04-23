@@ -65,6 +65,12 @@ df_sunburst.temp <-df_Seafood %>%
 
 df_sunburst <- rbind(df_sunburst,df_sunburst.temp)
 
+## removing labels from small values
+df_sunburst <- df_sunburst %>% 
+  mutate(labels = case_when(
+    values >= 1.3e+11 ~ labels,
+    values < 1.3e+11 ~ ""
+  ))
 
 
 
