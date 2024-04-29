@@ -65,11 +65,33 @@ df_sunburst.temp <-df_Seafood %>%
 
 df_sunburst <- rbind(df_sunburst,df_sunburst.temp)
 
+## Species sums
+df_sunburst.temp <- df_Seafood %>% 
+  group_by(Commodity, SpeciesType, labels = as.character(Species)) %>% 
+  summarise(values = sum(na.omit(Volume))) %>% 
+  ungroup() %>% 
+  mutate(parents = paste(Commodity," - ", SpeciesType),
+         ids = paste(Commodity," - ", SpeciesType, " - ", labels)) %>% 
+  select(ids, labels, parents, values)
+
+df_sunburst <- rbind(df_sunburst,df_sunburst.temp)
+
+### last one years (no calucation)
+df_sunburst.temp <- df_Seafood %>% 
+  select(Commodity, SpeciesType, Species, Year, Volume) %>% 
+  mutate(parents = paste(Commodity," - ", SpeciesType, " - ", Species),
+         ids = paste(Commodity," - ", SpeciesType, " - ", Species, " - ", Year),
+         labels = lubridate::year(Year),
+         values = Volume) %>% 
+  select(ids, labels, parents, values)
+
+df_sunburst <- rbind(df_sunburst,df_sunburst.temp)
+
 ## removing labels from small values
 df_sunburst <- df_sunburst %>% 
   mutate(labels = case_when(
-    values >= 1.3e+11 ~ labels,
-    values < 1.3e+11 ~ ""
+    values >= 1.6e+11 ~ labels,
+    values < 1.6e+11 ~ ""
   ))
 
 
@@ -87,5 +109,6 @@ layout(plot_ly(df_sunburst,
                parents = ~parents,
                values = ~values,
                type = 'sunburst',
-               branchvalues = 'total'
+               branchvalues = 'total',
+               maxdepth=3
 ), colorway = c("#009E73", "#0072B2", "#56B4E9" ,"#E69F00", "#F0E442" ))
