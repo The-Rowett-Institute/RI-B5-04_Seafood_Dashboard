@@ -110,5 +110,6 @@ layout(plot_ly(df_sunburst,
                values = ~values,
                type = 'sunburst',
                branchvalues = 'total',
-               maxdepth=3
+               maxdepth=3,
+               insidetextorientation='radial'
 ), colorway = c("#009E73", "#0072B2", "#56B4E9" ,"#E69F00", "#F0E442" ))

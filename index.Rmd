@@ -362,12 +362,44 @@ plot_ly(
 Key Messages
 =======================================================================
 
+*	This unique database harmonises secondary datasets across the whole seafood supply chain, to species level, between 2009 and 2020 (the most up-to-date data available) for the United Kingdom (UK).
+*	Datasets include seafood production (capture and aquaculture), trade (imports and exports), purchases (within and out-of-home), and human consumption.
+*	Data are available annually (calendar year), for up to 73 aquatic species. Species can be aggregated according to the Food and Agricultural Organization (FAO) 'International Standard Statistical Classification for Aquatic Animals and Plants' (ISSCAAP) and the Scientific Advisory Committee in Nutrition (SACN) classification.
+*	Corresponding nutrient values (omega-3 fatty acids, vitamin A, vitamin B12, vitamin D, calcium, iodine, iron, zinc, and selenium) for all aquatic species are provided, where possible, to allow mapping of the dietary flow of nutrients. 
+
+
 
 About
 =======================================================================
 
+This dashboard aims to understand how our consumption of seafood relates to food supply chains - what is being produced, what is imported and exported, and how does this relate to what we eat and what we should be eating for optimal health. This knowledge will help to reconsider national food supply chains, but also ensure that current national dietary guidelines take into account consumer health outcomes, as well as food supplies and the sustainability of food production systems.
+
 Source
 =======================================================================
 
+*	Capture production: [UK sea fisheries annual statistics - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/uk-sea-fisheries-annual-statistics)
+*	Aquaculture production: personal communications at CEFAS but data till 2018 can be found here [Database - Eurostat (europa.eu)](https://ec.europa.eu/eurostat/web/main/data/database)
+*	Trade (imports and exports): [Trade data - UK Trade Info](https://www.uktradeinfo.com/trade-data/)
+*	Purchases (within and out-of-home): [Family food statistics - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/family-food-statistics)
+*	Consumption: [National Diet and Nutrition Survey - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/national-diet-and-nutrition-survey)
+*	Nutrient composition: [Nutrient Analysis of Fish - GOV.UK (www.gov.uk) and About the Norwegian Food Composition Table (matvaretabellen.no)](https://www.matvaretabellen.no/about-us/)
+
+
 Related Publication
 =======================================================================
+
+##### Papers 
+
+
+##### Presentations
+
+* [PowerPoint Presentation (sefari.scot) 2023 May](https://sefari.scot/sites/default/files/documents/RESAS_DynamicEarthPosterFinal.pdf)
+
+Contact
+=======================================================================
+
+Created by Anneli Lofstedt and Bernhard Scheliga.  
+
+Contact information: Baukje de Roos, [The Rowett Institute](https://www.abdn.ac.uk/rowett/), University of Aberdeen. E-mail: [b.deroos@abdn.ac.uk](b.deroos@abdn.ac.uk)
+
+This research was funded by the Rural and Environment Science and Analytical Services Division (RESAS) of the Scottish Government, project RI-B5-04.
