@@ -210,7 +210,7 @@ filter_select("SpeciesType", "Choose Species Type", df_Seafood_shared, ~SpeciesT
 ## Row {.tabset .tabset-fade}
 ### Table 1 Data availablitiy
 
-Table 1 shows which commodity data is available for which species in the seafood database.The Seafood data base contains a decade worth (2009 - 2020) of data for 88 marine species.
+Table 1 shows which commodity data is available for which species in the seafood database.The Seafood data base contains a decade worth (2009 - 2020) of data for 88 marine species. When the data availability is __"No"__ it indicates that the data is either not captured, wasn't to us or is not relevant for the respective species, e.g. not every species can be farmed in aquaculture. 
 
 ```{r table 1 kable color }
 df_SF_availablity %>% 
@@ -362,44 +362,150 @@ plot_ly(
 Key Messages
 =======================================================================
 
-*	This unique database harmonises secondary datasets across the whole seafood supply chain, to species level, between 2009 and 2020 (the most up-to-date data available) for the United Kingdom (UK).
-*	Datasets include seafood production (capture and aquaculture), trade (imports and exports), purchases (within and out-of-home), and human consumption.
-*	Data are available annually (calendar year), for up to 73 aquatic species. Species can be aggregated according to the Food and Agricultural Organization (FAO) 'International Standard Statistical Classification for Aquatic Animals and Plants' (ISSCAAP) and the Scientific Advisory Committee in Nutrition (SACN) classification.
-*	Corresponding nutrient values (omega-3 fatty acids, vitamin A, vitamin B12, vitamin D, calcium, iodine, iron, zinc, and selenium) for all aquatic species are provided, where possible, to allow mapping of the dietary flow of nutrients. 
+```{r Key Messages}
+tbl_key_num <- c(1,2,3,4)
+tbl_key_text <- c("This unique database harmonises secondary datasets across the whole seafood supply chain, to species level, between 2009 and 2020 (the most up-to-date data available) for the United Kingdom (UK).",
+                 "Datasets include seafood production (capture and aquaculture), trade (imports and exports), purchases (within and out-of-home), and human consumption.",
+                 "Data are available annually (calendar year), for up to 73 aquatic species. Species can be aggregated according to the Food and Agricultural Organization (FAO) 'International Standard Statistical Classification for Aquatic Animals and Plants' (ISSCAAP) and the Scientific Advisory Committee in Nutrition (SACN) classification.",
+                 "Corresponding nutrient values (omega-3 fatty acids, vitamin A, vitamin B12, vitamin D, calcium, iodine, iron, zinc, and selenium) for all aquatic species are provided, where possible, to allow mapping of the dietary flow of nutrients.")
+tbl_key_blank <- c("","","","")
+
+tbl_key_msg <- data.frame(tbl_key_num,tbl_key_blank,tbl_key_text,tbl_key_blank)
+
+
+tbl_key_msg %>% 
+  kbl(col.names = NULL) %>% 
+  kable_paper(c("striped","hover"), full_width = FALSE,
+              html_font = "Cambria",
+              font_size = 18)
+```
+
 
 
 
 About
 =======================================================================
 
-This dashboard aims to understand how our consumption of seafood relates to food supply chains - what is being produced, what is imported and exported, and how does this relate to what we eat and what we should be eating for optimal health. This knowledge will help to reconsider national food supply chains, but also ensure that current national dietary guidelines take into account consumer health outcomes, as well as food supplies and the sustainability of food production systems.
+
+```{r About}
+tbl_about <-c("This dashboard aims to understand how our consumption of seafood relates to food supply chains - what is being produced, what is imported and exported, and how does this relate to what we eat and what we should be eating for optimal health. This knowledge will help to reconsider national food supply chains, but also ensure that current national dietary guidelines take into account consumer health outcomes, as well as food supplies and the sustainability of food production systems.",
+              "",
+              "Created by [Dr. Anneli Lofstedt](https://orcid.org/0000-0002-1865-0891) and [Dr. Bernhard Scheliga](https://orcid.org/0000-0003-2764-6605).",
+              "",
+      "Funded by the Rural and Environment Science and Analytical Services Division (RESAS) of the Scottish Government, project RI-B5-04."
+              )
+
+tbl_about %>% 
+  kbl(col.names = NULL) %>% 
+  kable_paper(c("striped","hover"), full_width = FALSE,
+              html_font = "Cambria",
+              font_size = 18)
+
+
+```
+
 
 Source
 =======================================================================
 
-*	Capture production: [UK sea fisheries annual statistics - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/uk-sea-fisheries-annual-statistics)
-*	Aquaculture production: personal communications at CEFAS but data till 2018 can be found here [Database - Eurostat (europa.eu)](https://ec.europa.eu/eurostat/web/main/data/database)
-*	Trade (imports and exports): [Trade data - UK Trade Info](https://www.uktradeinfo.com/trade-data/)
-*	Purchases (within and out-of-home): [Family food statistics - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/family-food-statistics)
-*	Consumption: [National Diet and Nutrition Survey - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/national-diet-and-nutrition-survey)
-*	Nutrient composition: [Nutrient Analysis of Fish - GOV.UK (www.gov.uk) and About the Norwegian Food Composition Table (matvaretabellen.no)](https://www.matvaretabellen.no/about-us/)
+
+### Version 1
+
+```{r Source table version 1}
+
+### Version 1
+tbl_SourceName <- c("","Capture production:", "Aquaculture production:","Trade (imports and exports):", "Purchases (within and out-of-home):", "Consumption:","Nutrient composition:")
+tbl_URL <- c("","[UK sea fisheries annual statistics - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/uk-sea-fisheries-annual-statistics)", "[Database - Eurostat (europa.eu)](https://ec.europa.eu/eurostat/web/main/data/database)", "[Trade data - UK Trade Info](https://www.uktradeinfo.com/trade-data/)",
+             "[Family food statistics - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/family-food-statistics)", "[National Diet and Nutrition Survey - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/national-diet-and-nutrition-survey)", "[Nutrient Analysis of Fish - GOV.UK (www.gov.uk) and About the Norwegian Food Composition Table (matvaretabellen.no)](https://www.matvaretabellen.no/about-us/)")
+tbl_Source <- data.frame(tbl_SourceName,tbl_URL)
+
+### adding footnote to Aquaculture
+tbl_Source[2,1]  <- paste0(tbl_Source[2,1], 
+       footnote_marker_symbol(1))
+
+
+
+tbl_Source %>% kbl(col.names = NULL, escape = FALSE) %>% kable_paper("hover", full_width = FALSE) %>% 
+  footnote(symbol = c("Currently, data is available for download until 2018 (01/01/2024). More recent data was aquired via personal communications with CEFAS"))
+
+
+```
+  
+  
+### Version 2  
+  
+```{r Source table version 2}
+### Version 2
+tbl_SourceName <- c("Capture:", "Aquaculture:","Imports and Exports:", "Within and out-of-home:","National Diet and Nutrition Survey", "Nutrient Analysis of Fish","Food Composition Table")
+tbl_URL <- c("[UK sea fisheries annual statistics - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/uk-sea-fisheries-annual-statistics)", 
+             "[Database - Eurostat (europa.eu)](https://ec.europa.eu/eurostat/web/main/data/database)",
+             "[UK Trade Info - GOV.UK (www.gov.uk)](https://www.uktradeinfo.com/trade-data/)",
+             "[Family food statistics - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/family-food-statistics)",
+             "[National Diet and Nutrition Survey - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/national-diet-and-nutrition-survey)",
+             "[Nutrient Analysis of Fish - GOV.UK (www.gov.uk)](www.gov.uk)",
+             "[Norwegian Food Composition Table (matvaretabellen.no)](https://www.matvaretabellen.no/about-us/)")
+tbl_Source <- data.frame(tbl_SourceName,tbl_URL)
+
+### adding footnote to Aquaculture
+tbl_Source[2,1]  <- paste0(tbl_Source[2,1], 
+       footnote_marker_symbol(1))
+
+
+tbl_Source %>% kbl(col.names = NULL, escape = FALSE) %>% 
+  kable_paper("hover", full_width = FALSE,
+               html_font = "Cambria",
+              font_size = 18) %>% 
+  pack_rows("Production data",1,2) %>% 
+  pack_rows("Trade data",3,3) %>%
+  pack_rows("Purchase data",4,4) %>%
+  pack_rows("Consumption data",5,5) %>%
+  pack_rows("Nutrient composition data",6,7) %>%
+  footnote(symbol = c("Currently, data is available for download until 2018 (01/01/2024). More recent data was aquired via personal communications with CEFAS"))
+
+```
 
 
 Related Publication
 =======================================================================
 
-##### Papers 
+```{r Related Publication}
+tbl_Rel_Pub <- c("[place holder]",
+                "[PowerPoint Presentation (sefari.scot)](https://sefari.scot/sites/default/files/documents/RESAS_DynamicEarthPosterFinal.pdf) 2023 May")
 
 
-##### Presentations
+tbl_Rel_Pub %>% kbl(col.names = NULL, escape = FALSE) %>% 
+  kable_paper("hover", full_width = FALSE,
+               html_font = "Cambria",
+              font_size = 18) %>% 
+  pack_rows("Paper",1,1) %>% 
+  pack_rows("Presentation",2,2)
 
-* [PowerPoint Presentation (sefari.scot) 2023 May](https://sefari.scot/sites/default/files/documents/RESAS_DynamicEarthPosterFinal.pdf)
+
+
+```
+
 
 Contact
 =======================================================================
 
+### new
+
+```{r}
+tbl_contact <- c("Prof. Baukje de Roos",
+                 "University of Aberdeen - [The Rowett Institute](https://www.abdn.ac.uk/rowett/)",
+                 "[b.deroos@abdn.ac.uk](b.deroos@abdn.ac.uk)")
+tbl_contact %>% kbl(col.names = NULL, escape = FALSE) %>% 
+  kable_paper("hover", full_width = FALSE,
+               html_font = "Cambria",
+              font_size = 18) %>% 
+  pack_rows("Contact Information",1,3) 
+
+```
+
+
+### old
 Created by Anneli Lofstedt and Bernhard Scheliga.  
 
-Contact information: Baukje de Roos, [The Rowett Institute](https://www.abdn.ac.uk/rowett/), University of Aberdeen. E-mail: [b.deroos@abdn.ac.uk](b.deroos@abdn.ac.uk)
+Contact information: Prof. Baukje de Roos, [The Rowett Institute](https://www.abdn.ac.uk/rowett/), University of Aberdeen. E-mail: [b.deroos@abdn.ac.uk](b.deroos@abdn.ac.uk)
 
 This research was funded by the Rural and Environment Science and Analytical Services Division (RESAS) of the Scottish Government, project RI-B5-04.
