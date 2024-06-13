@@ -409,31 +409,7 @@ Source
 =======================================================================
 
 
-### Version 1
 
-```{r Source table version 1}
-
-### Version 1
-tbl_SourceName <- c("","Capture production:", "Aquaculture production:","Trade (imports and exports):", "Purchases (within and out-of-home):", "Consumption:","Nutrient composition:")
-tbl_URL <- c("","[UK sea fisheries annual statistics - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/uk-sea-fisheries-annual-statistics)", "[Database - Eurostat (europa.eu)](https://ec.europa.eu/eurostat/web/main/data/database)", "[Trade data - UK Trade Info](https://www.uktradeinfo.com/trade-data/)",
-             "[Family food statistics - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/family-food-statistics)", "[National Diet and Nutrition Survey - GOV.UK (www.gov.uk)](https://www.gov.uk/government/collections/national-diet-and-nutrition-survey)", "[Nutrient Analysis of Fish - GOV.UK (www.gov.uk) and About the Norwegian Food Composition Table (matvaretabellen.no)](https://www.matvaretabellen.no/about-us/)")
-tbl_Source <- data.frame(tbl_SourceName,tbl_URL)
-
-### adding footnote to Aquaculture
-tbl_Source[2,1]  <- paste0(tbl_Source[2,1], 
-       footnote_marker_symbol(1))
-
-
-
-tbl_Source %>% kbl(col.names = NULL, escape = FALSE) %>% kable_paper("hover", full_width = FALSE) %>% 
-  footnote(symbol = c("Currently, data is available for download until 2018 (01/01/2024). More recent data was aquired via personal communications with CEFAS"))
-
-
-```
-  
-  
-### Version 2  
-  
 ```{r Source table version 2}
 ### Version 2
 tbl_SourceName <- c("Capture:", "Aquaculture:","Imports and Exports:", "Within and out-of-home:","National Diet and Nutrition Survey", "Nutrient Analysis of Fish","Food Composition Table")
@@ -453,6 +429,7 @@ tbl_Source[2,1]  <- paste0(tbl_Source[2,1],
 
 tbl_Source %>% kbl(col.names = NULL, escape = FALSE) %>% 
   kable_paper("hover", full_width = FALSE,
+              position = "left",
                html_font = "Cambria",
               font_size = 18) %>% 
   pack_rows("Production data",1,2) %>% 
@@ -475,6 +452,7 @@ tbl_Rel_Pub <- c("[place holder]",
 
 tbl_Rel_Pub %>% kbl(col.names = NULL, escape = FALSE) %>% 
   kable_paper("hover", full_width = FALSE,
+              position = "left",
                html_font = "Cambria",
               font_size = 18) %>% 
   pack_rows("Paper",1,1) %>% 
@@ -488,24 +466,16 @@ tbl_Rel_Pub %>% kbl(col.names = NULL, escape = FALSE) %>%
 Contact
 =======================================================================
 
-### new
 
 ```{r}
-tbl_contact <- c("Prof. Baukje de Roos",
+tbl_contact <- c("[Prof. Baukje de Roos](https://www.abdn.ac.uk/people/b.deroos#about)",
                  "University of Aberdeen - [The Rowett Institute](https://www.abdn.ac.uk/rowett/)",
                  "[b.deroos@abdn.ac.uk](b.deroos@abdn.ac.uk)")
 tbl_contact %>% kbl(col.names = NULL, escape = FALSE) %>% 
   kable_paper("hover", full_width = FALSE,
+              position = "left",
                html_font = "Cambria",
               font_size = 18) %>% 
   pack_rows("Contact Information",1,3) 
 
 ```
-
-
-### old
-Created by Anneli Lofstedt and Bernhard Scheliga.  
-
-Contact information: Prof. Baukje de Roos, [The Rowett Institute](https://www.abdn.ac.uk/rowett/), University of Aberdeen. E-mail: [b.deroos@abdn.ac.uk](b.deroos@abdn.ac.uk)
-
-This research was funded by the Rural and Environment Science and Analytical Services Division (RESAS) of the Scottish Government, project RI-B5-04.
