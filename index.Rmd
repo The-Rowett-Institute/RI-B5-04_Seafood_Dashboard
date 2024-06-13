@@ -210,7 +210,7 @@ filter_select("SpeciesType", "Choose Species Type", df_Seafood_shared, ~SpeciesT
 ## Row {.tabset .tabset-fade}
 ### Table 1 Data availablitiy
 
-Table 1 shows which commodity data is available for which species in the seafood database.The Seafood data base contains a decade worth (2009 - 2020) of data for 88 marine species. When the data availability is __"No"__ it indicates that the data is either not captured, wasn't to us or is not relevant for the respective species, e.g. not every species can be farmed in aquaculture. 
+Table 1 shows which commodity data is available for which species in the seafood database.The Seafood data base contains a decade worth (2009 - 2020) of data for 88 marine species. When the data availability is __"No"__ it indicates that the data is either not captured, not available to us or is not relevant for the respective species, e.g. not every species can be farmed in aquaculture. 
 
 ```{r table 1 kable color }
 df_SF_availablity %>% 
