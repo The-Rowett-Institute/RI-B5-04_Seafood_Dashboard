@@ -25,7 +25,7 @@ library(kableExtra)
 
 ```{r global, include=FALSE}
 ## Loading data
-df_Seafood <- vroom("Seafood-database_preliminary.csv")
+df_Seafood <- vroom("Seafood-database.csv")
 
 ## processing data
 # Turning Character columns in Factors. But first selecting all columns of class = Character
@@ -181,30 +181,6 @@ Dashboard
 
 ## Row {.sidebar}
 
-
-
-```{r filter, eval=FALSE, include=FALSE}
-
-# https://stackoverflow.com/questions/45887038/plot-simple-chart-on-the-basis-of-data-subset-in-flexdashboard
-#selectInput("selectInput1", "Select Species Type:", 
-          #  choices = unique(df_Seafood$SpeciesType))
-
-#electInput("selectInput2", "Select Commodity:", 
-           # choices = unique(df_Seafood$Commodity))
-
-#input
-
-
-filter_checkbox("Commodity", "Choose Import or Export", df_Seafood_shared, ~Commodity)
-filter_select("SpeciesType", "Choose Species Type", df_Seafood_shared, ~SpeciesType)
-```
-
-```{r}
-# Create a subset data frame 
-#selectedData = reactive({df_Seafood %>% filter(SpeciesType == as.character(input$selectInput1), Commodity == as.character(input$selectInput2)) 
-  
- #  })
-```
 
 
 ## Row {.tabset .tabset-fade}
